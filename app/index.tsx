@@ -11,18 +11,21 @@ const placeHoldersElements = (
 ) => {
   const placeholderCount = Math.max(0, remainingGuesses - 1);
   if (placeholderCount === 0) {
-    return <View className=""></View>;
+    return null;
   }
+  // renders elements based on number of letters and remaining guesses (rows and columns )
   return (
-    // renders elements based on number of letters and remaining guesses (rows and columns )
-    <View className="">
+    <View className="mt-1 ">
       {Array.from<number>({ length: placeholderCount }).map((_, index) => (
-        <View key={index} className="mt-2 grid gap-3 grid-cols-4 font-semibold">
+        <View
+          key={index}
+          className="pt-2 flex flex-row flex-wrap justify-center items-center gap-3 "
+        >
           {Array.from<number>({ length: numberOfLetters }).map(
             (_, letterIndex) => (
               <View
                 key={letterIndex}
-                className="bg-gray-300 w-8 h-8 rounded-md flex justify-center items-center"
+                className="bg-gray-300 w-8 h-8 rounded-md flex justify-center items-center gap-3"
               ></View>
             )
           )}
@@ -65,20 +68,20 @@ const index: React.FC = () => {
         return (
           <View
             key={index}
-            className="bg-red-300 w-8 h-8 rounded-md flex justify-center items-center"
+            className="bg-red-300 w-8 h-8 rounded-md flex justify-center items-center p-0 m-0"
           >
-            {letter.toUpperCase()}
+            <Text className="font-semibold">{letter.toUpperCase()}</Text>
           </View>
         );
       } else if (word.indexOf(letter.toLowerCase()) !== -1) {
         if (letter.toLowerCase() === word[index]) {
-          // letter exist in word array in a correct position
+          // letter exist in word array in a correct positioe
           return (
             <View
               key={index}
-              className="bg-green-300 w-8 h-8 rounded-md flex justify-center items-center"
+              className="bg-green-300 w-8 h-8 rounded-md flex justify-center items-center p-0 m-0"
             >
-              {letter.toUpperCase()}
+              <Text className="font-semibold">{letter.toUpperCase()}</Text>
             </View>
           );
         } else {
@@ -86,9 +89,9 @@ const index: React.FC = () => {
           return (
             <View
               key={index}
-              className="bg-yellow-300 w-8 h-8 rounded-md flex justify-center items-center"
+              className="bg-yellow-300 w-8 h-8 rounded-md flex justify-center items-center p-0 m-0"
             >
-              {letter.toUpperCase()}
+              <Text className="font-semibold">{letter.toUpperCase()}</Text>
             </View>
           );
         }
@@ -96,7 +99,12 @@ const index: React.FC = () => {
       return null;
     });
 
-    setElements((prev) => [...prev, newElements as JSX.Element[]]);
+    const wrapper = (
+      <View className="flex flex-row items-center justify-center gap-x-3 ">
+        {newElements}
+      </View>
+    );
+    setElements((prev) => [...prev, wrapper as JSX.Element[]]);
   }, [guessedLetters]);
 
   const onSubmit = (e: any) => {
@@ -138,6 +146,9 @@ const index: React.FC = () => {
       if (inputs.every((input) => input !== "")) {
         inputRefs.current[1]?.focus();
         onSubmit(e);
+      } else {
+        console.log(index);
+        inputRefs.current[index]?.focus();
       }
     }
   };
@@ -146,28 +157,32 @@ const index: React.FC = () => {
       <View className="bg-blue-600">
         <Text className="text-white font-bold ">Wordizzle</Text>
       </View>
-      {/* Game */}
+
       <View className="mt-16 ">
-        <View className="grid gap-3 grid-cols-4 font-semibold">
-          {elements}
-          {/* if remaning guesses is not zero, allow user to enter inputs  */}
-          {remainingGuesses > 0 &&
-            inputs.map((input, index) => {
-              return (
-                <View className="bg-gray-300 w-8 h-8 rounded-md flex justify-center items-center">
-                  <TextInput
-                    className="w-8 h-8 rounded-md font-semibold text-center"
-                    key={index}
-                    editable
-                    maxLength={1}
-                    value={input.toUpperCase()}
-                    onChangeText={(text) => handleInputChange(text, index)}
-                    onKeyPress={(e) => handleKeyPress(index, e)}
-                    ref={(el) => (inputRefs.current[index] = el)}
-                  />
-                </View>
-              );
-            })}
+        <View className=" bg-blue-500">
+          <View className="flex flex-col gap-y-3 p-0 m-0">{elements}</View>
+          <View className="flex flex-row gap-x-3 mt-2 p-0">
+            {remainingGuesses > 0
+              ? inputs.map((input, index) => {
+                  return (
+                    <View
+                      key={index}
+                      className="bg-gray-300 w-8 h-8 rounded-md flex justify-center items-center "
+                    >
+                      <TextInput
+                        className="w-8 h-8 rounded-md font-semibold text-center"
+                        editable
+                        maxLength={1}
+                        value={input.toUpperCase()}
+                        onChangeText={(text) => handleInputChange(text, index)}
+                        onKeyPress={(e) => handleKeyPress(index, e)}
+                        ref={(el) => (inputRefs.current[index] = el)}
+                      />
+                    </View>
+                  );
+                })
+              : null}
+          </View>
         </View>
         {placeHoldersElements(remainingGuesses, numberOfLetters)}
         <View className="mt-4 bg-gray-300 text-black">
