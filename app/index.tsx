@@ -153,13 +153,13 @@ const index: React.FC = () => {
     }
   };
   return (
-    <View className="flex justify-center items-center mt-16">
-      <View className="bg-blue-600">
+    <View className="flex justify-center items-center bg-gray-500 h-screen">
+      <View className="">
         <Text className="text-white font-bold ">Wordizzle</Text>
       </View>
 
       <View className="mt-16 ">
-        <View className=" bg-blue-500">
+        <View className=" ">
           <View className="flex flex-col gap-y-3 p-0 m-0">{elements}</View>
           <View className="flex flex-row gap-x-3 mt-2 p-0">
             {remainingGuesses > 0
@@ -185,7 +185,7 @@ const index: React.FC = () => {
           </View>
         </View>
         {placeHoldersElements(remainingGuesses, numberOfLetters)}
-        <View className="mt-4 bg-gray-300 text-black">
+        <View className="mt-4 text-black">
           <Button
             onPress={onSubmit}
             title="Submit"
