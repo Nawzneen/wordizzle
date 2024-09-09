@@ -1,9 +1,12 @@
 import React from "react";
 import { Text, StyleSheet, Pressable } from "react-native";
-
-export default function Button(props) {
-  const { onPress, title, disabled } = props;
-  const test = false;
+type ButtonProps = {
+  onPress: (e: any) => void;
+  title: string;
+  disabled: boolean;
+};
+function Button({ onPress, title, disabled }: ButtonProps) {
+  console.log("button is being rendered");
   return (
     <Pressable
       style={
@@ -42,3 +45,5 @@ const styles = StyleSheet.create({
     backgroundColor: "gray",
   },
 });
+
+export default React.memo(Button);

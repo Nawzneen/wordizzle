@@ -3,37 +3,7 @@ import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 import React from "react";
 import "../styles/styles.css";
 import Button from "../components/Button";
-
-// shows the remaining elements for guesses as blank divs depending on number of letters in the word and guesses
-const placeHoldersElements = (
-  remainingGuesses: number,
-  numberOfLetters: number
-) => {
-  const placeholderCount = Math.max(0, remainingGuesses - 1);
-  if (placeholderCount === 0) {
-    return null;
-  }
-  // renders elements based on number of letters and remaining guesses (rows and columns )
-  return (
-    <View className="mt-1 ">
-      {Array.from<number>({ length: placeholderCount }).map((_, index) => (
-        <View
-          key={index}
-          className="pt-2 flex flex-row flex-wrap justify-center items-center gap-3 "
-        >
-          {Array.from<number>({ length: numberOfLetters }).map(
-            (_, letterIndex) => (
-              <View
-                key={letterIndex}
-                className="bg-gray-300 w-8 h-8 rounded-md flex justify-center items-center gap-3"
-              ></View>
-            )
-          )}
-        </View>
-      ))}
-    </View>
-  );
-};
+import PlaceHolderElements from "@/components/PlaceHolderElements";
 
 const index: React.FC = () => {
   const word = "bell";
@@ -62,6 +32,7 @@ const index: React.FC = () => {
     }
   }, [inputs]);
   React.useEffect(() => {
+    // Render the elements with the guessed letters in different colors
     const newElements = guessedLetters.map((letter, index) => {
       if (word.indexOf(letter.toLowerCase()) === -1) {
         // letter doesnt exist in word array
@@ -184,7 +155,11 @@ const index: React.FC = () => {
               : null}
           </View>
         </View>
-        {placeHoldersElements(remainingGuesses, numberOfLetters)}
+        <PlaceHolderElements
+          remainingGuesses={remainingGuesses}
+          numberOfLetters={numberOfLetters}
+        />
+        {/* {placeHoldersElements(remainingGuesses, numberOfLetters)} */}
         <View className="mt-4 text-black">
           <Button
             onPress={onSubmit}
