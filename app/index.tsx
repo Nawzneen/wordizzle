@@ -4,24 +4,41 @@ import React from "react";
 import "../styles/styles.css";
 import Button from "../components/Button";
 import PlaceHolderElements from "@/components/PlaceHolderElements";
+import { fetchRandomWordByLength } from "@/utils/utils";
 
 const index: React.FC = () => {
-  const word = "bell";
+  // const word = "test";
+  const [word, setWord] = React.useState<string | null>(null);
   const finalNumberOfGuesses = 4;
-  const numberOfLetters = word.length;
+  const numberOfLetters = word?.length;
   const [remainingGuesses, setRemainingGuesses] =
     React.useState<number>(finalNumberOfGuesses);
-  const [inputs, setInputs] = React.useState<string[]>([
-    `${word[0]}`,
-    "",
-    "",
-    "",
-  ]);
+  const [inputs, setInputs] = React.useState<string[]>(["", "", "", ""]);
   const [isSubmitDisabled, setIsSubmitDisabled] = React.useState<boolean>(true);
   const [elements, setElements] = React.useState<JSX.Element[] | null>([]);
   const inputRefs = React.useRef<Array<TextInput | null>>([]);
 
   const [guessedLetters, setGuessedLetters] = React.useState<Array<string>>([]);
+  const getWord = async () => {
+    try {
+      const word = await fetchRandomWordByLength("4");
+      setWord(word);
+      console.log("word", word);
+      setInputs([`${word[0]}`, "", "", ""]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const hasWon = () => {
+    console.log("You won");
+    getWord();
+    setRemainingGuesses(finalNumberOfGuesses);
+    setElements([]);
+    setGuessedLetters([]);
+  };
+  React.useEffect(() => {
+    getWord();
+  }, []);
   React.useEffect(() => {
     if (inputs.every((input) => input !== "")) {
       // enable the submit button if the inputs are filled
@@ -34,7 +51,7 @@ const index: React.FC = () => {
   React.useEffect(() => {
     // Render the elements with the guessed letters in different colors
     const newElements = guessedLetters.map((letter, index) => {
-      if (word.indexOf(letter.toLowerCase()) === -1) {
+      if (word?.indexOf(letter.toLowerCase()) === -1) {
         // letter doesnt exist in word array
         return (
           <View
@@ -44,8 +61,8 @@ const index: React.FC = () => {
             <Text className="font-semibold">{letter.toUpperCase()}</Text>
           </View>
         );
-      } else if (word.indexOf(letter.toLowerCase()) !== -1) {
-        if (letter.toLowerCase() === word[index]) {
+      } else if (word?.indexOf(letter.toLowerCase()) !== -1) {
+        if (letter.toLowerCase() === word?.[index]) {
           // letter exist in word array in a correct positioe
           return (
             <View
@@ -76,13 +93,18 @@ const index: React.FC = () => {
       </View>
     );
     setElements((prev) => [...prev, wrapper as JSX.Element[]]);
+    // Check if the guessedLetters are the same is the word
+    if (guessedLetters.join("").toLocaleLowerCase() === word) {
+      console.log("You won");
+      hasWon();
+    }
   }, [guessedLetters]);
 
   const onSubmit = (e: any) => {
     e.preventDefault();
     setGuessedLetters(inputs);
     // empty the inputs
-    setInputs([`${word[0]}`, "", "", ""]);
+    setInputs([`${word?.[0]}`, "", "", ""]);
     // set the submit button to disabled
     setIsSubmitDisabled(true);
     if (remainingGuesses > 0) {
@@ -133,7 +155,7 @@ const index: React.FC = () => {
         <View className=" ">
           <View className="flex flex-col gap-y-3 p-0 m-0">{elements}</View>
           <View className="flex flex-row gap-x-3 mt-2 p-0">
-            {remainingGuesses > 0
+            {remainingGuesses > 0 && word !== ""
               ? inputs.map((input, index) => {
                   return (
                     <View
@@ -159,7 +181,6 @@ const index: React.FC = () => {
           remainingGuesses={remainingGuesses}
           numberOfLetters={numberOfLetters}
         />
-        {/* {placeHoldersElements(remainingGuesses, numberOfLetters)} */}
         <View className="mt-4 text-black">
           <Button
             onPress={onSubmit}
