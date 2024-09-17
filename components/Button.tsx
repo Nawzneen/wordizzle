@@ -1,12 +1,8 @@
 import React from "react";
 import { Text, StyleSheet, Pressable } from "react-native";
-type ButtonProps = {
-  onPress: (e: any) => void;
-  title: string;
-  disabled: boolean;
-};
+import { ButtonProps } from "@/types/types";
 function Button({ onPress, title, disabled }: ButtonProps) {
-  console.log("button is being rendered");
+  // console.log("button is being rendered");
   return (
     <Pressable
       style={

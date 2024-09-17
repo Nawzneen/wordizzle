@@ -1,9 +1,6 @@
 import React from "react";
 import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
-type PlaceHoldersElementsProps = {
-  remainingGuesses: number;
-  numberOfLetters: number;
-};
+import { PlaceHoldersElementsProps } from "@/types/types";
 
 // shows the remaining elements for guesses as blank divs depending on number of letters in the word and guesses
 const PlaceHoldersElements = ({
@@ -14,7 +11,6 @@ const PlaceHoldersElements = ({
   if (placeholderCount === 0) {
     return null;
   }
-  console.log("placeholder is being rendered");
   // renders elements based on number of letters and remaining guesses (rows and columns )
   return (
     <View className="mt-1 ">
