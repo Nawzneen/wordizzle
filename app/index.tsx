@@ -1,23 +1,28 @@
-import { NativeSyntheticEvent, TextInputKeyPressEventData } from "react-native";
+import {
+  Keyboard,
+  NativeSyntheticEvent,
+  TextInputKeyPressEventData,
+} from "react-native";
 import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 import React from "react";
 import "../styles/styles.css";
 import Button from "../components/Button";
 import PlaceHolderElements from "@/components/PlaceHolderElements";
 import { fetchRandomWordByLength } from "@/utils/utils";
-
+import CustomKeyboard from "@/components/CustomKeyboard";
+import { Platform } from "react-native";
 const index: React.FC = () => {
-  // const word = "test";
   const [word, setWord] = React.useState<string | null>(null);
   const finalNumberOfGuesses = 4;
-  const numberOfLetters = word?.length;
+  const numberOfLetters: number = word?.length ?? 0;
   const [remainingGuesses, setRemainingGuesses] =
     React.useState<number>(finalNumberOfGuesses);
   const [inputs, setInputs] = React.useState<string[]>(["", "", "", ""]);
   const [isSubmitDisabled, setIsSubmitDisabled] = React.useState<boolean>(true);
   const [elements, setElements] = React.useState<JSX.Element[] | null>([]);
-  const inputRefs = React.useRef<Array<TextInput | null>>([]);
 
+  const inputRefs = React.useRef<Array<TextInput | null>>([]);
+  const [focusedIndex, setFocusedIndex] = React.useState<number>(0);
   const [guessedLetters, setGuessedLetters] = React.useState<Array<string>>([]);
   const getWord = async () => {
     try {
@@ -28,13 +33,6 @@ const index: React.FC = () => {
     } catch (error) {
       console.log(error);
     }
-  };
-  const hasWon = () => {
-    console.log("You won");
-    getWord();
-    setRemainingGuesses(finalNumberOfGuesses);
-    setElements([]);
-    setGuessedLetters([]);
   };
   React.useEffect(() => {
     getWord();
@@ -99,10 +97,18 @@ const index: React.FC = () => {
       hasWon();
     }
   }, [guessedLetters]);
-
+  const hasWon = () => {
+    console.log("You won");
+    getWord();
+    setRemainingGuesses(finalNumberOfGuesses);
+    setElements([]);
+    setGuessedLetters([]);
+  };
   const onSubmit = (e: any) => {
     e.preventDefault();
     setGuessedLetters(inputs);
+    // set new focus to the first element
+    inputRefs.current[0]?.focus();
     // empty the inputs
     setInputs([`${word?.[0]}`, "", "", ""]);
     // set the submit button to disabled
@@ -110,6 +116,14 @@ const index: React.FC = () => {
     if (remainingGuesses > 0) {
       setRemainingGuesses((prev) => prev - 1);
     }
+    //  else if (remainingGuesses <= 0) {
+    // }
+  };
+  const onRefresh = () => {
+    getWord();
+    setRemainingGuesses(finalNumberOfGuesses);
+    setElements([]);
+    setGuessedLetters([]);
   };
   const handleInputChange = (value: string, index: number) => {
     let newInputs = [...inputs];
@@ -145,6 +159,29 @@ const index: React.FC = () => {
       }
     }
   };
+  const handleInputFocus = (index: number) => {
+    setFocusedIndex(index);
+  };
+  const handleCustomKeyPress = (key: string): void => {
+    if (key === "DEL") {
+      if (focusedIndex !== null && inputs[focusedIndex] === "") {
+        // Move to the previous input field if the current one is empty
+        inputRefs.current[focusedIndex - 1]?.focus();
+      } else if (focusedIndex !== null && inputs[focusedIndex] !== "") {
+        handleInputChange("", focusedIndex);
+      }
+    } else {
+      if (focusedIndex !== null) {
+        const newInputs = [...inputs]; //copy the inputs
+        newInputs[focusedIndex] = key; //store the key in the focused input
+        setInputs(newInputs);
+        inputRefs.current[focusedIndex + 1]?.focus(); //focus on the next input
+        console.log("update input", focusedIndex, "with key", key);
+      } else {
+        // console.log("no input is currently focused");
+      }
+    }
+  };
   return (
     <View className="flex justify-center items-center bg-gray-500 h-screen">
       <View className="">
@@ -162,15 +199,31 @@ const index: React.FC = () => {
                       key={index}
                       className="bg-gray-300 w-8 h-8 rounded-md flex justify-center items-center "
                     >
-                      <TextInput
-                        className="w-8 h-8 rounded-md font-semibold text-center"
-                        editable
-                        maxLength={1}
-                        value={input.toUpperCase()}
-                        onChangeText={(text) => handleInputChange(text, index)}
-                        onKeyPress={(e) => handleKeyPress(index, e)}
-                        ref={(el) => (inputRefs.current[index] = el)}
-                      />
+                      {Platform.OS === "web" ? (
+                        <TextInput
+                          className="w-8 h-8 rounded-md font-semibold text-center"
+                          editable
+                          maxLength={1}
+                          value={input.toUpperCase()}
+                          onChangeText={(text) =>
+                            handleInputChange(text, index)
+                          }
+                          onKeyPress={(e) => handleKeyPress(index, e)}
+                          ref={(el) => (inputRefs.current[index] = el)}
+                        />
+                      ) : (
+                        <TextInput
+                          className="w-8 h-8 rounded-md font-semibold text-center"
+                          maxLength={1}
+                          value={inputs[index].toUpperCase()}
+                          showSoftInputOnFocus={false}
+                          // onChangeText={(text) => handleInputChange(text, index)}
+                          // onKeyPress={(e) => handleKeyPress(index, e)}
+                          onFocus={() => handleInputFocus(index)}
+                          ref={(el) => (inputRefs.current[index] = el)}
+                          // placeholder={` ${index + 1}`}
+                        />
+                      )}
                     </View>
                   );
                 })
@@ -187,8 +240,14 @@ const index: React.FC = () => {
             title="Submit"
             disabled={isSubmitDisabled}
           />
+          {remainingGuesses <= 0 && (
+            <Button onPress={onRefresh} title="Refresh" />
+          )}
         </View>
       </View>
+      {Platform.OS === "web" ? null : (
+        <CustomKeyboard handleCustomKeyPress={handleCustomKeyPress} />
+      )}
     </View>
   );
 };
